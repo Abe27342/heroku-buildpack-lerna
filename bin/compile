@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 # bin/compile <build-dir> <cache-dir> <env-dir>
 
+# Some dependency code adapted from here: https://github.com/jan-tee/heroku-buildpack-monorepo/blob/master/bin/compile
 # Ensure wildcards in globs match dotfiles too.
 shopt -s dotglob
+
+indent() {
+    sed -u 's/^/      /'
+}
 
 BUILD_DIR="$1"
 CACHE_DIR="$2"
@@ -18,6 +23,12 @@ if [ ! -f "${ENV_DIR}/PACKAGE_NAME" ]; then
     exit 1
 fi
 PACKAGE_NAME="$(cat "${ENV_DIR}/PACKAGE_NAME")"
+
+if [ ! -f "${ENV_DIR}/DEPENDENCIES" ]; then
+    echo "No dependencies configured. If you wish to include local packages in monorepo with '../<package>' style depencies, set DEPENDENCIES." | indent
+else
+    DEPENDENCIES="$(cat "${ENV_DIR}/DEPENDENCIES")"
+fi
 
 if [ ! -f "${ENV_DIR}/PACKAGE_PATH" ]; then
     echo "PACKAGE_PATH was not set. Value will be set to packages/${PACKAGE_NAME}" | indent
@@ -43,6 +54,21 @@ cd -
 
 (
     mv "${BUILD_DIR}/${PACKAGE_PATH}" "${STAGE}" &&
+    if [ ! -z "$DEPENDENCIES" ]; then
+        echo "Processing dependencies" | indent
+        for DEPENDENCY in ${DEPENDENCIES}; do
+            if [ ! -d "${BUILD_DIR}/${DEPENDENCY}" ]; then
+                echo "Dependency ${DEPENDENCY} not found. Aborting" | indent
+                exit 1
+            fi
+            TARGET="${STAGE}/${PACKAGE_PATH}/node_modules/${DEPENDENCY}"
+            echo "Replacing ${TARGET} symlink with locally built package from ${BUILD_DIR}/${DEPENDENCY}" | indent | indent
+            # Note: there's probably duplicate node modules generated this way. It's likely safe to prune node_modules folder
+            # on the dependency.
+            rm -rf "${TARGET}"
+            mv -v "${BUILD_DIR}/${DEPENDENCY}" "${TARGET}"
+        done
+    fi &&
     mv "${BUILD_DIR}/.heroku" "${STAGE}/.heroku"
     mv "${BUILD_DIR}/.profile.d" "${STAGE}/.profile.d"
     rm -rf "${BUILD_DIR}"/* &&
