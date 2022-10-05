@@ -67,7 +67,7 @@ cd -
             # on the dependency.
             rm -rf "${TARGET}"
             mkdir -p "${TARGET}"
-            mv "${BUILD_DIR}/packages/${DEPENDENCY}/*" "${TARGET}"
+            mv "${BUILD_DIR}/packages/${DEPENDENCY}"/* "${TARGET}"
         done
     fi &&
     mv "${BUILD_DIR}/.heroku" "${STAGE}/.heroku"
