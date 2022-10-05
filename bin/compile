@@ -57,16 +57,16 @@ cd -
     if [ ! -z "$DEPENDENCIES" ]; then
         echo "Processing dependencies" | indent
         for DEPENDENCY in ${DEPENDENCIES}; do
-            if [ ! -d "${BUILD_DIR}/${DEPENDENCY}" ]; then
+            if [ ! -d "${BUILD_DIR}/packages/${DEPENDENCY}" ]; then
                 echo "Dependency ${DEPENDENCY} not found. Aborting" | indent
                 exit 1
             fi
-            TARGET="${STAGE}/${PACKAGE_PATH}/node_modules/${DEPENDENCY}"
-            echo "Replacing ${TARGET} symlink with locally built package from ${BUILD_DIR}/${DEPENDENCY}" | indent | indent
+            TARGET="${STAGE}/${PACKAGE_PATH}/node_modules/@belle-puzzles/${DEPENDENCY}"
+            echo "Replacing ${TARGET} symlink with locally built package from ${BUILD_DIR}/packages/${DEPENDENCY}" | indent | indent
             # Note: there's probably duplicate node modules generated this way. It's likely safe to prune node_modules folder
             # on the dependency.
             rm -rf "${TARGET}"
-            mv -v "${BUILD_DIR}/${DEPENDENCY}" "${TARGET}"
+            mv -v "${BUILD_DIR}/packages/${DEPENDENCY}" "${TARGET}"
         done
     fi &&
     mv "${BUILD_DIR}/.heroku" "${STAGE}/.heroku"
