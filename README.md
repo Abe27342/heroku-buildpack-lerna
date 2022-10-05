@@ -1,5 +1,9 @@
 # heroku-buildpack-lerna
 
+This is a fork of [heroku-buildpack-lerna](https://github.com/Zefir-Engineering/heroku-buildpack-lerna) that incorporates some logic from a [heroku-buildpack-monorepo fork](https://github.com/jan-tee/heroku-buildpack-monorepo/blob/master/bin/compile) to enable intra-repo dependencies.
+It's currently highly-specific for the Belle Puzzles bot deployment, but it should be possible to remove some of the hard-coded variables using
+lerna commands along the lines of the approach mentioned [here](https://github.com/lerna/lerna/issues/1061#issuecomment-336413280).
+
 Buildpack allowing us to deploy an application using [lerna](https://github.com/lerna/lerna) on heroku.
 This buildpack is based on these two buildpacks: [heroku-buildpack-nodejs](https://github.com/heroku/heroku-buildpack-nodejs) and [heroku-buildpack-monorepo](https://github.com/lstoll/heroku-buildpack-monorepo).
 
